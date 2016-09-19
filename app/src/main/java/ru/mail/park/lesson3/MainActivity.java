@@ -67,7 +67,11 @@ public class MainActivity extends AppCompatActivity {
                 loadFromUrl(URL_2);
             }
         });
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
         UrlDownloader.getInstance().setCallback(new UrlDownloader.Callback() {
             @Override
             public void onLoaded(String key, String value) {
@@ -87,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         getPreferences(Context.MODE_PRIVATE).edit().putString("text1", text1.getText().toString())
                 .putString("text2", text2.getText().toString()).commit();
+        UrlDownloader.getInstance().unsetCallback();
         super.onStop();
 
     }

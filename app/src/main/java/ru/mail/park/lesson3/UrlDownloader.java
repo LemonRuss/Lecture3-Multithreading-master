@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -29,10 +31,20 @@ public class UrlDownloader {
 
     private LruCache<String, String> cache = new LruCache<>(32);
 
+    private HashMap<String, String> callbackCache = new HashMap();
+
     private Callback callback;
 
     public void setCallback(Callback callback) {
         this.callback = callback;
+        for (Map.Entry<String, String> entry : callbackCache.entrySet()) {
+            notifyLoaded(entry.getKey(), entry.getValue());
+            callbackCache.remove(entry.getKey());
+        }
+    }
+
+    public void unsetCallback() {
+        this.callback = null;
     }
 
     public void load(final String url) {
@@ -57,6 +69,9 @@ public class UrlDownloader {
     }
 
     private void notifyLoaded(final String url, final String result) {
+        if (callback == null) {
+            callbackCache.put(url, result);
+        }
         Ui.run(new Runnable() {
             @Override
             public void run() {
